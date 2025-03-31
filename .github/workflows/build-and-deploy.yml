@@ -26,4 +26,4 @@ jobs:
 
       - name: Push Docker image to GitHub Container Registry
         run: |
-          docker push ghcr.io/${{ github.repository }}/my-container:latest
+          docker push ghcr.io/heman/my-go-project/my-container:latest

@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  build-and-upload:
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -28,3 +28,13 @@ jobs:
           push: true
           # Name our container image ghcr.io/YOUR_USER/lab-cicd:latest and something similar to ghcr.io/YOUR_USER/lab-cicd:f296f4d
           tags: "ghcr.io/heman/my-go-project:latest"
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-upload
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Deploy to DigitalOcean App Platform
+        uses: digitalocean/app_action/deploy@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}

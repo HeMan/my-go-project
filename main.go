@@ -3,20 +3,12 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
+
+	"my-go-project/database"
 
 	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/valyala/fasthttp"
 )
-
-// User represents the Users table in the database
-type User struct {
-	ID       uint   `gorm:"primaryKey"`
-	Name     string `gorm:"size:100;not null"`
-	Email    string `gorm:"size:100;unique;not null"`
-	Password string `gorm:"size:255;not null"`
-}
 
 func main() {
 	fmt.Println("Hello, World!")
@@ -27,36 +19,24 @@ func main() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	// Database connection string from environment variables
-	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
-		os.Getenv("POSTGRES_HOSTNAME"),
-		os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"),
-		os.Getenv("POSTGRES_DB"),
-		os.Getenv("POSTGRES_PORT"),
-		os.Getenv("POSTGRES_SSLMODE"),
-		os.Getenv("POSTGRES_TIMEZONE"),
-	)
+	// Initialize the database
+	database.Init()
 
-	// Connect to the database
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("Failed to connect to the database: %v", err)
+	// Define a simple fasthttp route
+	requestHandler := func(ctx *fasthttp.RequestCtx) {
+		switch string(ctx.Path()) {
+		case "/ping":
+			ctx.SetStatusCode(fasthttp.StatusOK)
+			ctx.SetBodyString("pong")
+		default:
+			ctx.SetStatusCode(fasthttp.StatusNotFound)
+			ctx.SetBodyString("Not Found")
+		}
 	}
 
-	// Auto-migrate the User model
-	err = db.AutoMigrate(&User{})
-	if err != nil {
-		log.Fatalf("Failed to migrate database: %v", err)
+	// Start the fasthttp server
+	log.Println("Starting server on :8080")
+	if err := fasthttp.ListenAndServe(":8080", requestHandler); err != nil {
+		log.Fatalf("Error starting server: %v", err)
 	}
-
-	// Example: Create a new user
-	newUser := User{Name: "John Doe", Email: "john.doe@example.com", Password: "securepassword"}
-	result := db.Create(&newUser)
-	if result.Error != nil {
-		log.Fatalf("Failed to create user: %v", result.Error)
-	}
-
-	log.Println("User created successfully:", newUser)
 }

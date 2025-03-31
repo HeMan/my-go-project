@@ -19,11 +19,10 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Docker image
-        run: |
-          docker build -t my-container:latest .
-
-      - name: Push Docker image to GitHub Container Registry
-        run: |
-          docker push ghcr.io/heman/my-go-project/my-container:latest
+      # Build and push our container image
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          # Name our container image ghcr.io/YOUR_USER/lab-cicd:latest and something similar to ghcr.io/YOUR_USER/lab-cicd:f296f4d
+          tags: "ghcr.io/heman/my-go-project:latest"

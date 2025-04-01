@@ -17,3 +17,4 @@ jobs:
         uses: digitalocean/app_action/deploy@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          print_deploy_logs: false

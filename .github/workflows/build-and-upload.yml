@@ -3,6 +3,9 @@ name: Build and Upload Docker Container
 on:
   workflow_dispatch:
   push:
+    paths:
+      - !.do/*
+      - !.github/workflows/*
     branches:
       - main
 

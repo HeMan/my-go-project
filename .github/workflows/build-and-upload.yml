@@ -1,4 +1,4 @@
-name: Build and Deploy Docker Container
+name: Build and Upload Docker Container
 
 on:
   workflow_dispatch:
@@ -22,20 +22,8 @@ jobs:
           registry: ghcr.io/heman
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      # Build and push our container image
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           push: true
-          # Name our container image ghcr.io/YOUR_USER/lab-cicd:latest and something similar to ghcr.io/YOUR_USER/lab-cicd:f296f4d
           tags: "ghcr.io/heman/my-go-project:latest"
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build-and-upload
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Deploy to DigitalOcean App Platform
-        uses: digitalocean/app_action/deploy@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}

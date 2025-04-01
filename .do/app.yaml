@@ -65,7 +65,7 @@ services:
   - key: SCRIPT_NAME
     scope: RUN_TIME
     value: /dpage-pgadmin-4
-  http_port: 8080
+  http_port: 80
   image:
     registry: dpage
     registry_type: DOCKER_HUB

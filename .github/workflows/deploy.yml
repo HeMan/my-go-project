@@ -3,8 +3,9 @@ name: Deploy to DigitalOcean
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    tags:
+      - release/*
+      - v*
 
 jobs:
   deploy:

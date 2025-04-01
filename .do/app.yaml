@@ -40,6 +40,7 @@ ingress:
         prefix: /
   - component:
       name: dpage-pgadmin-4
+      preserve_path_prefix: true
     match:
       path:
         prefix: /dpage-pgadmin-4

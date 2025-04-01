@@ -56,8 +56,7 @@ services:
 - envs:
   - key: PGADMIN_DEFAULT_PASSWORD
     scope: RUN_TIME
-    type: SECRET
-    value: EV[1:xPCTs0oF+mVIZh5xMo+d6COuk+a9R9GX:6iJ8Gn4l4bC9jQp5HC5bL3mzZrED1DU4cg==]
+    value: 1Hemligt!
   - key: PGADMIN_DEFAULT_EMAIL
     scope: RUN_TIME
     value: jimmy.hedman@gmail.com

@@ -2,9 +2,11 @@ alerts:
 - rule: DEPLOYMENT_FAILED
 - rule: DOMAIN_FAILED
 databases:
-- engine: PG
+- cluster_name: my-go-database
+  engine: PG
   name: my-go-database
   version: "17"
+  production: true
 envs:
 - key: POSTGRES_HOSTNAME
   scope: RUN_AND_BUILD_TIME

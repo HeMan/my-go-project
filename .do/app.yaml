@@ -2,9 +2,8 @@ alerts:
 - rule: DEPLOYMENT_FAILED
 - rule: DOMAIN_FAILED
 databases:
-- name: my-go-database
-  engine: PG
-  production: false
+- engine: PG
+  name: my-go-database
   version: "17"
 envs:
 - key: POSTGRES_HOSTNAME
@@ -37,6 +36,11 @@ ingress:
     match:
       path:
         prefix: /
+  - component:
+      name: dpage-pgadmin-4
+    match:
+      path:
+        prefix: /dpage-pgadmin-4
 name: clownfish-app
 region: ams
 services:
@@ -49,3 +53,23 @@ services:
   instance_count: 1
   instance_size_slug: apps-s-1vcpu-0.5gb
   name: heman-my-go-project
+- envs:
+  - key: PGADMIN_DEFAULT_PASSWORD
+    scope: RUN_TIME
+    type: SECRET
+    value: EV[1:xPCTs0oF+mVIZh5xMo+d6COuk+a9R9GX:6iJ8Gn4l4bC9jQp5HC5bL3mzZrED1DU4cg==]
+  - key: PGADMIN_DEFAULT_EMAIL
+    scope: RUN_TIME
+    value: jimmy.hedman@gmail.com
+  - key: SCRIPT_NAME
+    scope: RUN_TIME
+    value: /dpage-pgadmin-4
+  http_port: 8080
+  image:
+    registry: dpage
+    registry_type: DOCKER_HUB
+    repository: pgadmin4
+    tag: latest
+  instance_count: 1
+  instance_size_slug: apps-s-1vcpu-0.5gb
+  name: dpage-pgadmin-4

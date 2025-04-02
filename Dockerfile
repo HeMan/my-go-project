@@ -1,5 +1,5 @@
 # Use the official Go image for Go 1.24
-FROM golang:1.24 as builder
+FROM golang:1.24 AS builder
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -9,6 +9,9 @@ COPY . ./
 
 # Generate go.sum and resolve dependencies
 RUN go mod tidy
+
+# Run tests to ensure the application is working correctly
+RUN go test ./tests/ -v
 
 # Build the Go application
 RUN go build -o my-go-project

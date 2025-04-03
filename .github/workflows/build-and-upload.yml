@@ -26,6 +26,10 @@ jobs:
           registry: ghcr.io/heman
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Testcontainers Cloud Client
+        uses: atomicjar/testcontainers-cloud-setup-action@v1
+        with:
+          token: ${{ secrets.TC_CLOUD_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v6
         with:

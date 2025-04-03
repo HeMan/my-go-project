@@ -6,6 +6,7 @@ on:
     paths:
       - !.do/*
       - !.github/workflows/*
+      - !terraform/*
     branches:
       - main
 

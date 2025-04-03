@@ -34,9 +34,11 @@ func Init() {
 		log.Fatalf("Failed to connect to the database: %v", err)
 	}
 
-	// Auto-migrate the User model
-	err = DB.AutoMigrate(&models.User{})
-	if err != nil {
-		log.Fatalf("Failed to migrate database: %v", err)
+	// Auto-migrate all registered models
+	for _, model := range models.GetRegisteredModels() {
+		err := DB.AutoMigrate(model)
+		if err != nil {
+			log.Fatalf("Failed to migrate model %T: %v", model, err)
+		}
 	}
 }

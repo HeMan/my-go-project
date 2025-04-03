@@ -3,20 +3,19 @@ package tests
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http/httptest"
+	"net/http"
 	"os"
 	"testing"
 
+	"my-go-project/models"
 	"my-go-project/routes"
 
 	_ "github.com/lib/pq"
-	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 
+	"github.com/gavv/httpexpect/v2"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -114,45 +113,52 @@ func setupPostgresContainer(ctx context.Context, t *testing.T) (testcontainers.C
 	return postgresContainer, db
 }
 
-func TestExampleRouteFunctional(t *testing.T) {
-	http_req := httptest.NewRequest("GET", "/example", nil)
-	resp, err := app.Test(http_req)
+type fiberTransport struct {
+	app *fiber.App
+}
+
+func (ft *fiberTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Use Fiber's app.Test method to handle the request
+	resp, err := ft.app.Test(req)
 	if err != nil {
-		t.Fatalf("Failed to test Fiber app: %s", err)
+		return nil, err
 	}
-	if resp.StatusCode != 200 {
-		t.Fatalf("Expected status code 200, got %d", resp.StatusCode)
-	}
-	respBody, _ := io.ReadAll(resp.Body)
-	assert.Equal(t, string(respBody), "Hello, this is an example route!")
+	return resp, nil
+}
+
+func TestExampleRouteFunctional(t *testing.T) {
+	server := httpexpect.WithConfig(httpexpect.Config{
+		Client: &http.Client{
+			Transport: &fiberTransport{app: app}, // Use custom transport
+		},
+		Reporter: httpexpect.NewRequireReporter(t),
+	})
+	server.GET("/example").
+		Expect().
+		Status(200).
+		Body().IsEqual("Hello, this is an example route!")
+	t.Log("TestExampleRouteFunctional passed")
 }
 
 func TestTodoRouteFunctional(t *testing.T) {
-	http_req := httptest.NewRequest("GET", "/todo", nil)
-	resp, err := app.Test(http_req)
-	if err != nil {
-		t.Fatalf("Failed to test Fiber app: %s", err)
-	}
-	if resp.StatusCode != 200 {
-		t.Fatalf("Expected status code 200, got %d", resp.StatusCode)
-	}
-	respBody, _ := io.ReadAll(resp.Body)
+	server := httpexpect.WithConfig(httpexpect.Config{
+		Client: &http.Client{
+			Transport: &fiberTransport{app: app}, // Use custom transport
+		},
+		Reporter: httpexpect.NewRequireReporter(t),
+	})
 
-	// Define the expected and actual structs
-	type Todo struct {
-		ID   int    `json:"id"`
-		Task string `json:"task"`
-	}
-	var actualTodos []Todo
-	err = json.Unmarshal(respBody, &actualTodos)
-	if err != nil {
-		t.Fatalf("Failed to unmarshal response body: %s", err)
+	// Define the expected todos using the Todo struct
+	expectedTodos := []models.Todo{
+		{ID: 1, Subject: "Buy groceries", Completed: false},
+		{ID: 2, Subject: "Read a book", Completed: true},
+		{ID: 3, Subject: "Write some code", Completed: false},
 	}
 
-	expectedTodos := []Todo{
-		{ID: 1, Task: "Buy groceries"},
-		{ID: 2, Task: "Clean the house"},
-	}
-
-	assert.Equal(t, expectedTodos, actualTodos, "Response body does not match expected todos")
+	server.GET("/todo").
+		Expect().
+		Status(200).
+		JSON().Array().
+		IsEqual(expectedTodos)
+	t.Log("TestTodoRouteFunctional passed")
 }

@@ -12,7 +12,7 @@ func init() {
 // Todo represents a task with a summary, dates, and completion status.
 type Todo struct {
 	ID        int        `gorm:"primaryKey" json:"id"`
-	Subject   string     `gorm:"size:255;not null" json:"summary"`
+	Subject   string     `gorm:"size:255;not null" json:"subject"`
 	CreatedAt time.Time  `gorm:"autoCreateTime" json:"created_date"`
 	DueDate   *time.Time `gorm:"type:timestamp" json:"due_date,omitempty"` // Pointer to allow empty value
 	Completed bool       `gorm:"default:false" json:"completed"`

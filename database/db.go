@@ -9,6 +9,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var DB *gorm.DB
@@ -27,13 +28,26 @@ func Init() {
 		os.Getenv("POSTGRES_TIMEZONE"),
 	)
 
+	// Configure GORM logger for SQL query logging
+	logLevel := logger.Silent
+	switch os.Getenv("GORM_LOG_LEVEL") {
+	case "Info":
+		logLevel = logger.Info
+	case "Warn":
+		logLevel = logger.Warn
+	case "Error":
+		logLevel = logger.Error
+	}
+	config := &gorm.Config{
+		Logger: logger.Default.LogMode(logLevel),
+	}
+
 	// Connect to the database
 	var err error
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	DB, err = gorm.Open(postgres.Open(dsn), config)
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
 	}
-
 	// Auto-migrate all registered models
 	for _, model := range models.GetRegisteredModels() {
 		err := DB.AutoMigrate(model)

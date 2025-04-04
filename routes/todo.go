@@ -1,17 +1,25 @@
 package routes
 
 import (
+	"log" // Added for logging
 	"my-go-project/models"
 
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
-func RegisterTodoRoutes(app *fiber.App) {
+func RegisterTodoRoutes(app *fiber.App, db *gorm.DB) {
+
 	app.Get("/todo", func(c *fiber.Ctx) error {
-		todos := []models.Todo{
-			{ID: 1, Subject: "Buy groceries", Completed: false},
-			{ID: 2, Subject: "Read a book", Completed: true},
-			{ID: 3, Subject: "Write some code", Completed: false},
+		var todos []models.Todo
+
+		// Attempt to fetch todos with their corresponding notes
+		if err := db.Preload("Notes").Find(&todos).Error; err != nil {
+			log.Printf("Error fetching todos with notes in transaction: %v", err) // Log the error
+			return c.Status(500).JSON(fiber.Map{
+				"error":   "Failed to fetch todos with notes",
+				"details": err.Error(),
+			})
 		}
 		return c.JSON(todos)
 	})

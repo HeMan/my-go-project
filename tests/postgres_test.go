@@ -30,6 +30,10 @@ var (
 )
 
 func TestMain(m *testing.M) {
+	if os.Getenv("RUN_TESTCONTAINER") == "" {
+		fmt.Println("Skipping tests as RUN_TESTCONTAINER is not set")
+		return
+	}
 	ctx := context.Background()
 	// Setup PostgreSQL container
 	postgresContainer, db = setupPostgresContainer(ctx, nil)

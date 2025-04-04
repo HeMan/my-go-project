@@ -11,7 +11,7 @@ COPY . ./
 RUN go mod tidy
 
 # Run tests to ensure the application is working correctly
-RUN go test -skip TestPostgresContainer ./... -v
+RUN go test ./... -v
 
 # Build the Go application
 RUN go build -o my-go-project

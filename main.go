@@ -30,7 +30,6 @@ func main() {
 	// Register routes
 	routes.RegisterExampleRoute(app)
 	routes.RegisterTodoRoutes(app, database.DB)
-	routes.RegisterSwaggerRoute(app)
 
 	// Debug: Print all registered routes
 	for _, route := range app.Stack() {

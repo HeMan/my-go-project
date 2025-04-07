@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	"my-go-project/database"
 	"my-go-project/models"
@@ -15,8 +16,9 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"gorm.io/driver/postgres"
+	pg "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
 	"github.com/gavv/httpexpect/v2"
@@ -63,53 +65,37 @@ func TestMain(m *testing.M) {
 }
 
 func setupPostgresContainer(ctx context.Context, t *testing.T) (testcontainers.Container, *gorm.DB) {
-	// Create a PostgreSQL container
-	req := testcontainers.ContainerRequest{
-		Image:        "postgres:17",
-		ExposedPorts: []string{"5432/tcp"},
-		Env: map[string]string{
-			"POSTGRES_USER":     "testuser",
-			"POSTGRES_PASSWORD": "testpassword",
-			"POSTGRES_DB":       "testdb",
-		},
-		WaitingFor: wait.ForListeningPort("5432/tcp"),
-	}
-	postgresContainer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-	if err != nil {
-		if t != nil {
-			t.Fatalf("Failed to start PostgreSQL container: %s", err)
-		} else {
-			fmt.Printf("Failed to start PostgreSQL container: %s\n", err)
-			os.Exit(1)
-		}
-	}
+	dbName := "users"
+	dbUser := "user"
+	dbPassword := "password"
 
-	// Get the container's host and port
-	host, err := postgresContainer.Host(ctx)
+	postgresContainer, err := postgres.Run(ctx,
+		"postgres:17",
+		postgres.WithDatabase(dbName),
+		postgres.WithUsername(dbUser),
+		postgres.WithPassword(dbPassword),
+		testcontainers.WithWaitStrategy(
+			wait.ForLog("database system is ready to accept connections").
+				WithOccurrence(2).
+				WithStartupTimeout(5*time.Second)),
+	)
 	if err != nil {
-		if t != nil {
-			t.Fatalf("Failed to get container host: %s", err)
-		} else {
-			fmt.Printf("Failed to get container host: %s\n", err)
-			os.Exit(1)
-		}
-	}
-	port, err := postgresContainer.MappedPort(ctx, "5432")
-	if err != nil {
-		if t != nil {
-			t.Fatalf("Failed to get container port: %s", err)
-		} else {
-			fmt.Printf("Failed to get container port: %s\n", err)
-			os.Exit(1)
-		}
+		fmt.Printf("failed to start container: %s", err)
+		os.Exit(1)
 	}
 
 	// Connect to the PostgreSQL database
-	dsn := fmt.Sprintf("postgres://testuser:testpassword@%s:%s/testdb?sslmode=disable", host, port.Port())
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	dsn, err := postgresContainer.ConnectionString(ctx, "sslmode=disable")
+	if err != nil {
+		if t != nil {
+			t.Fatalf("Failed to get connection string: %s", err)
+		} else {
+			fmt.Printf("Failed to get connection string: %s\n", err)
+			os.Exit(1)
+		}
+	}
+
+	db, err := gorm.Open(pg.Open(dsn), &gorm.Config{})
 	if err != nil {
 		if t != nil {
 			t.Fatalf("Failed to connect to PostgreSQL: %s", err)

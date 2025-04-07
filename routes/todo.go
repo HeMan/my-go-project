@@ -10,7 +10,7 @@ import (
 
 func RegisterTodoRoutes(app *fiber.App, db *gorm.DB) {
 
-	app.Get("/todo", func(c *fiber.Ctx) error {
+	app.Get("/todos", func(c *fiber.Ctx) error {
 		var todos []models.Todo
 
 		// Attempt to fetch todos with their corresponding notes

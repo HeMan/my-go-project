@@ -167,7 +167,7 @@ func TestTodoRouteFunctional(t *testing.T) {
 		},
 	}
 	var todos []models.Todo
-	result := server.GET("/todo").
+	result := server.GET("/todos").
 		Expect().
 		Status(200).
 		JSON().Array()

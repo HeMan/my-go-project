@@ -65,7 +65,7 @@ func TestMain(m *testing.M) {
 func setupPostgresContainer(ctx context.Context, t *testing.T) (testcontainers.Container, *gorm.DB) {
 	// Create a PostgreSQL container
 	req := testcontainers.ContainerRequest{
-		Image:        "postgres:15",
+		Image:        "postgres:17",
 		ExposedPorts: []string{"5432/tcp"},
 		Env: map[string]string{
 			"POSTGRES_USER":     "testuser",

@@ -3,6 +3,7 @@ const apiBase = "/todos";
 document.addEventListener("DOMContentLoaded", () => {
     const todoList = document.getElementById("todo-list");
     const todoSubjectInput = document.getElementById("todo-subject");
+    const todoNotesInput = document.getElementById("todo-notes");
     const addTodoButton = document.getElementById("add-todo");
 
     // Fetch and display todos
@@ -19,14 +20,30 @@ document.addEventListener("DOMContentLoaded", () => {
             todos.forEach(todo => {
                 const li = document.createElement("li");
                 li.className = todo.completed ? "completed" : "";
+
+                // Add debug logging to check the notes structure
+                console.log('Todo notes:', todo.notes);
+
+                const notesSection = Array.isArray(todo.notes) && todo.notes.length > 0
+                    ? `<div class="notes-section">
+                        <small>Notes:</small>
+                        <ul class="notes-list">
+                            ${todo.notes.map(note => `<li>${note?.note || 'No content'}</li>`).join('')}
+                        </ul>
+                      </div>`
+                    : '';
+
                 li.innerHTML = `
-                    <span>${todo.subject}</span>
-                    <div>
-                        <button onclick="toggleTodo(${todo.ID}, ${todo.completed})">
-                            ${todo.completed ? "Unmark" : "Complete"}
-                        </button>
-                        <button onclick="deleteTodo(${todo.ID})">Delete</button>
+                    <div class="todo-main">
+                        <span class="todo-subject">${todo.subject}</span>
+                        <div class="todo-actions">
+                            <button onclick="toggleTodo(${todo.ID}, ${todo.completed})">
+                                ${todo.completed ? "Unmark" : "Complete"}
+                            </button>
+                            <button onclick="deleteTodo(${todo.ID})">Delete</button>
+                        </div>
                     </div>
+                    ${notesSection}
                 `;
                 todoList.appendChild(li);
             });
@@ -38,13 +55,24 @@ document.addEventListener("DOMContentLoaded", () => {
     // Add a new todo
     addTodoButton.addEventListener("click", async () => {
         const subject = todoSubjectInput.value.trim();
+        const noteText = todoNotesInput ? todoNotesInput.value.trim() : '';
         if (!subject) return alert("Please enter a todo subject.");
+
+        const todoData = {
+            subject,
+            completed: false,
+            notes: noteText ? [{ content: noteText }] : []
+        };
+
         await fetch(apiBase, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ subject, completed: false }),
+            body: JSON.stringify(todoData),
         });
         todoSubjectInput.value = "";
+        if (todoNotesInput) {
+            todoNotesInput.value = "";
+        }
         fetchTodos();
     });
 

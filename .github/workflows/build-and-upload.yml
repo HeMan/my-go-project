@@ -26,10 +26,17 @@ jobs:
         with:
           token: ${{ secrets.TC_CLOUD_TOKEN }}
           wait: false
+      - name: Install go packages
+        run: go install github.com/ctrf-io/go-ctrf-json-reporter/cmd/go-ctrf-json-reporter@latest
       - name: Run tests
         env:
           RUN_TESTCONTAINER: true
-        run: go test ./... -v
+        run: go test ./... -v -json | go-ctrf-json-reporter -output ./crtf-report.json
+      - name: Publish Test Report
+        uses: ctrf-io/github-test-reporter@v1
+        with:
+          report-path: './crtf-report.json'
+        if: always()
 
   build-and-upload:
     runs-on: ubuntu-latest

@@ -11,8 +11,29 @@ on:
       - main
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: 'go.mod'
+          cache-dependency-path: 'go.sum'
+      - name: Set up Testcontainers Cloud
+        uses: atomicjar/testcontainers-cloud-setup-action@v1
+        with:
+          token: ${{ secrets.TC_CLOUD_TOKEN }}
+          wait: false
+      - name: Run tests
+        env:
+          RUN_TESTCONTAINER: true
+        run: go test ./... -v
+
   build-and-upload:
     runs-on: ubuntu-latest
+    needs: test
     permissions:
       packages: write
       contents: read

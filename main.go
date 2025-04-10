@@ -27,6 +27,9 @@ func main() {
 
 	app := fiber.New()
 
+	// Serve static files from the "static" directory
+	app.Static("/", "./static")
+
 	// Register routes
 	routes.RegisterExampleRoute(app)
 	routes.RegisterTodoRoutes(app, database.DB)

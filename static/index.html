@@ -16,6 +16,21 @@
         </div>
         <ul id="todo-list"></ul>
     </div>
+    <div id="edit-modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Edit Todo</h2>
+            <label for="edit-subject">Subject:</label>
+            <input type="text" id="edit-subject" />
+            <label for="edit-due-date">Due Date:</label>
+            <input type="date" id="edit-due-date" />
+            <label for="edit-note">Note:</label>
+            <textarea id="edit-note"></textarea>
+            <div class="modal-actions">
+                <button id="save-edit">Save</button>
+                <button onclick="document.getElementById('edit-modal').style.display='none'">Cancel</button>
+            </div>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>

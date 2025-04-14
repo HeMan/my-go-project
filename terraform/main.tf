@@ -1,59 +1,34 @@
+terraform {
+  required_version = ">= 1.0.0"
+
+  required_providers {
+    digitalocean = {
+      source  = "digitalocean/digitalocean"
+      version = ">= 2.0.0"
+    }
+  }
+}
+
 provider "digitalocean" {
   token = var.digitalocean_token
 }
 
 resource "digitalocean_app" "my_go_project_app" {
   spec {
-    name = "my-go-project-app"
+    name   = "my-go-project-app"
     region = "ams3"
 
-    static_site {
-      name       = "my-go-project"
-      git {
-        repo_clone_url = var.repo_url
-        branch         = "main"
+    service {
+      name        = "my-go-project"
+      http_port   = 8080
+      run_command = "./my-go-project"
+
+      image {
+        registry      = "ghcr.io"
+        repository    = "heman/my-go-project"
+        tag           = "latest"
+        registry_type = "GHCR"
       }
-      build_command = "go build -o my-go-project"
-      run_command   = "./my-go-project"
-      http_port     = 8080
-    }
-
-    database {
-      name       = "my-go-project-dev-db"
-      engine     = "pg"
-      version    = "17"
-      size       = "db-s-1vcpu-1gb"
-      production = false
-    }
-
-    env {
-      key   = "POSTGRES_HOSTNAME"
-      value = "${my-go-project-dev-db.HOSTNAME}"
-      scope = "RUN_AND_BUILD_TIME"
-    }
-
-    env {
-      key   = "POSTGRES_USER"
-      value = "${my-go-project-dev-db.USERNAME}"
-      scope = "RUN_AND_BUILD_TIME"
-    }
-
-    env {
-      key   = "POSTGRES_PASSWORD"
-      value = "${my-go-project-dev-db.PASSWORD}"
-      scope = "RUN_AND_BUILD_TIME"
-    }
-
-    env {
-      key   = "POSTGRES_DB"
-      value = "${my-go-project-dev-db.DATABASE}"
-      scope = "RUN_AND_BUILD_TIME"
-    }
-
-    env {
-      key   = "POSTGRES_PORT"
-      value = "${my-go-project-dev-db.PORT}"
-      scope = "RUN_AND_BUILD_TIME"
     }
   }
 }
